@@ -1,0 +1,68 @@
+html {
+    background-color: darkgray;
+    user-select: none;
+}
+
+h2 {
+    background-color: teal;
+    padding: 18px;
+    font-weight: bold;
+    font-size: 32px;
+}
+
+#left-aside {
+    float: left;
+}
+
+#right-aside {
+    float: right;
+}
+
+canvas {
+    border: black 2px solid;
+    background-color: white;
+}
+
+.vertical-menu {
+    width: 100px;
+}
+
+.vertical-menu a {
+    background-color: gray;
+    color: black;
+    display: block;
+    padding: 12px;
+    text-decoration: none;
+}
+
+.hover-enabled a:hover {
+    background-color: #ccc;
+}
+
+.hover-enabled a:active {
+    background-color: teal;
+    color: white;
+}
+
+.colorpicker {
+    background-color: #222222;
+    border-radius: 5px 5px 5px 5px;
+    box-shadow: 2px 2px 2px #444444;
+    color: #FFFFFF;
+    font-size: 12px;
+    width: 320px;
+
+    position: fixed;
+    top: 28%;
+    left: 75%;
+    margin-left: -150px;
+    margin-top: -100px;
+    z-index: 10;
+}
+
+#picker {
+    cursor: crosshair;
+    float: left;
+    margin: 10px;
+    border: 0;
+}

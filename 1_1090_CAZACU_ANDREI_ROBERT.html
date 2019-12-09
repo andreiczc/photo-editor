@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Photo editor</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="1_1090_CAZACU_ANDREI_ROBERT.css">
+    <script src="1_1090_CAZACU_ANDREI_ROBERT.js"></script>
+</head>
+
+<body>
+    <header>
+        <h2>
+            <center>Photo editor</center>
+        </h2>
+    </header>
+
+    <aside id="left-aside">
+        <nav>
+            <div class="vertical-menu" class="hover-enabled">
+                <a onclick="changeEff(event)">Move</a>
+                <a onclick="changeEff(event)">Resize</a>
+                <a onclick="changeEff(event)">Draw line</a>
+                <a onclick="changeEff(event)">Draw rectangle</a>
+            </div>
+        </nav>
+    </aside>
+
+    <aside id="right-aside">
+        <nav>
+            <div id="right-div" class="vertical-menu">
+                <div class="hover-enabled">
+                    <a onclick="savePhoto(event)">Save</a>
+                    <a onclick="clearCanvas(event)">Delete</a>
+                </div>
+
+                <a id="penBtn" onclick="changePenColor(event)">Pen color</a>
+                <a id="BackgroundBtn" onclick="changeBackgroundColor(event)">Background color</a>
+            </div>
+        </nav>
+    </aside>
+
+    <section>
+        <div class="photo-editor">
+            <canvas ondragover="allowDrop(event)" ondrop="drop(event)"></canvas>
+        </div>
+    </section>
+
+    <div class="colorpicker" style="display:none">
+        <canvas id="picker" width="300" height="300"></canvas>
+    </div>
+</body>
+
+</html>
