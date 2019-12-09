@@ -8,6 +8,8 @@ class Element {
     }
 }
 
+//TODO fix this mess
+
 var canvas;
 var ctx;
 var el = null;
