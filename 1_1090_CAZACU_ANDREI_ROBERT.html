@@ -36,13 +36,18 @@
 
                 <a id="penBtn" onclick="changePenColor(event)">Pen color</a>
                 <a id="BackgroundBtn" onclick="changeBackgroundColor(event)">Background color</a>
+                <a style="background-color: darkgray;"></a>
+
+                <div class="hover-enabled layer-list">
+
+                </div>
             </div>
         </nav>
     </aside>
 
     <section>
         <div class="photo-editor">
-            <canvas ondragover="allowDrop(event)" ondrop="drop(event)"></canvas>
+            <canvas ondragover="allowDrop(event)" ondrop="drop(event)" style='z-index: 10;'></canvas>
         </div>
     </section>
 

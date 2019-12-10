@@ -21,7 +21,8 @@ h2 {
 
 canvas {
     border: black 2px solid;
-    background-color: white;
+    position: relative;
+    z-index: 5;
 }
 
 .vertical-menu {

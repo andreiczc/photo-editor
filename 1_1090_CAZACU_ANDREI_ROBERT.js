@@ -8,11 +8,15 @@ class Element {
     }
 }
 
-//TODO fix this mess
+// TODO fix colorpicker
+// TODO fix generateCanvas and generate layers
 
 var canvas;
 var ctx;
-var el = null;
+
+var elements = [];
+
+var canvases = [];
 
 var currentEff = null;
 var currentEl = null;
@@ -117,6 +121,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     canvas.addEventListener('mousedown', (ev) => {
+        console.log('mouse down');
+
         redraw();
 
         let animationId;
@@ -130,6 +136,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let absY = ev.y - rect.y;
 
         let mouseMoveFunc = (ev) => {
+            console.log('mouse move')
+
             let currX = ev.x - rect.x;
             let currY = ev.y - rect.y;
 
@@ -157,6 +165,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.addEventListener('mousemove', mouseMoveFunc);
 
         document.addEventListener('mouseup', (ev) => {
+            console.log('mouse up');
+
             document.removeEventListener('mousemove', mouseMoveFunc);
             if (animationId)
                 cancelAnimationFrame(animationId);
@@ -222,8 +232,10 @@ function savePhoto(ev) {
 
 function redraw() {
     if (el) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(el.img, el.x, el.y, el.width, el.height);
+        let ct = canvases[canvases.length - 1].getContext('2d');
+
+        ct.clearRect(0, 0, canvas.width, canvas.height);
+        ct.drawImage(el.img, el.x, el.y, el.width, el.height);
     }
 
     animationId = requestAnimationFrame(redraw);
@@ -354,6 +366,11 @@ function disableEffect() {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
+
+    for (c in canvases) {
+        c.width = canvas.width;
+        c.height = canvas.height;
+    }
 })
 
 function allowDrop(event) {
@@ -376,6 +393,7 @@ function drop(event) {
             img.onload = (ev) => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height, img.width, img.height);
 
+                // adjusting image size to fit canvas
                 if (img.width > canvas.width || img.height > canvas.height) {
                     var multiplier1, multiplier2;
 
@@ -390,7 +408,10 @@ function drop(event) {
                     img.height = (img.height / multiplier);
                 }
 
-                ctx.drawImage(img, 0, 0, img.width, img.height);
+                generateCanvas();
+                let ct = canvases[canvases.length - 1].getContext('2d');
+                ct.drawImage(img, 0, 0, img.width, img.height);
+
                 el = new Element(img, img.width, img.height);
             }
         }
@@ -418,7 +439,12 @@ function changeBackgroundColor(ev) {
 function generateCanvas() {
     let mCanvas = document.createElement('canvas');
     let div = document.querySelector('.photo-editor');
-    div.append(mCanvas);
     mCanvas.style.position = 'absolute';
     mCanvas.style.left = canvas.getBoundingClientRect().left + 'px';
+    mCanvas.width = canvas.width;
+    mCanvas.height = canvas.height;
+
+    div.append(mCanvas);
+
+    canvases.push(mCanvas);
 }
