@@ -18,6 +18,8 @@ var elements = [];
 
 var canvases = [];
 
+var layerNo = 1;
+
 var currentEff = null;
 var currentEl = null;
 
@@ -408,11 +410,13 @@ function drop(event) {
                     img.height = (img.height / multiplier);
                 }
 
-                generateCanvas();
+                let layer = generateCanvas();
                 let ct = canvases[canvases.length - 1].getContext('2d');
                 ct.drawImage(img, 0, 0, img.width, img.height);
 
-                el = new Element(img, img.width, img.height);
+                let el = new Element(img, img.width, img.height);
+                elements.push(el);
+                layer.element = el;
             }
         }
     }
@@ -446,5 +450,23 @@ function generateCanvas() {
 
     div.append(mCanvas);
 
+    let layer = document.createElement('a');
+    layer.layerNo = layerNo;
+    layer.id = 'layer' + layerNo;
+    layer.innerText = 'Layer ' + layerNo++;
+    layer.element = null;
+
+    layer.onclick = function (ev) {
+        let c = canvases[this.layerNo - 1];
+        if (c.style.display == 'none')
+            c.style.display = 'inline';
+        else
+            c.style.display = 'none';
+    }
+
+    document.querySelector('.layer-list').append(layer);
+
     canvases.push(mCanvas);
+
+    return layer;
 }
