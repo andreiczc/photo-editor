@@ -1,6 +1,7 @@
 html {
     background-color: darkgray;
     user-select: none;
+    font-family: sans-serif;
 }
 
 h2 {
