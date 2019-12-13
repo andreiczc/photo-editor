@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 })
 
+// TODO clearCanvas only works for top most canvas
 function clearCanvas(ev) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -189,6 +190,7 @@ function clearCanvas(ev) {
     currentEff = null;
 }
 
+// TODO needs rewriting
 function savePhoto(ev) {
     let temp;
     let a = document.createElement('a');
@@ -232,6 +234,7 @@ function savePhoto(ev) {
     clearCanvas();
 }
 
+// TODO check it out | rn it works for the latest canvas only
 function redraw() {
     if (el) {
         let ct = canvases[canvases.length - 1].getContext('2d');
@@ -243,6 +246,7 @@ function redraw() {
     animationId = requestAnimationFrame(redraw);
 }
 
+// it works 
 function resize(el, x, y) {
     if (el.x + el.width + x < canvas.width && el.x + el.width + x > 50 && el.width + x > 50) {
         el.width += x;
@@ -265,6 +269,7 @@ function resize(el, x, y) {
     }
 }
 
+// works
 function move(el, x, y) {
     if (el.x + el.width + x < canvas.width && el.x + el.width + x > 0 & el.x + x >= 0) {
         el.x += x;
@@ -287,6 +292,7 @@ function move(el, x, y) {
     }
 }
 
+// TODO choose a canvas
 function drawLine(startX, startY, currX, currY) {
     ctx.beginPath();
     ctx.moveTo(startX, startY);
@@ -296,6 +302,8 @@ function drawLine(startX, startY, currX, currY) {
     restorePath = canvas.toDataURL();
 }
 
+
+// TODO choose a canvas
 function drawRectangle(startX, startY, width, height, animationId, it) {
     if (it != 0) {
         let restore = new Image();
@@ -316,11 +324,11 @@ function drawRectangle(startX, startY, width, height, animationId, it) {
     }
 }
 
+// it works
 function changeEff(ev) {
     if (currentEl != ev.target) {
         if (currentEl) {
-            currentEl.style.backgroundColor = 'gray';
-            currentEl.style.color = 'black';
+            disableEffect();
         }
 
         currentEl = ev.target;
@@ -342,11 +350,9 @@ function changeEff(ev) {
                 break;
         }
 
-        currentEl.style.backgroundColor = 'teal';
-        currentEl.style.color = 'white';
+        enableEffect();
     } else {
-        currentEl.style.backgroundColor = 'gray';
-        currentEl.style.color = 'black';
+        disableEffect();
 
         currentEl = null;
         currentEff = null;
@@ -365,15 +371,14 @@ function disableEffect() {
     }
 }
 
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth - 250;
-    canvas.height = window.innerHeight - 250;
+function enableEffect() {
+    try {
+        currentEl.style.backgroundColor = 'teal';
+        currentEl.style.color = 'white';
+    } catch {
 
-    for (c in canvases) {
-        c.width = canvas.width;
-        c.height = canvas.height;
     }
-})
+}
 
 function allowDrop(event) {
     event.preventDefault();
@@ -422,6 +427,7 @@ function drop(event) {
     }
 }
 
+// fully works
 function changePenColor(ev) {
     disableEffect();
 
@@ -431,6 +437,7 @@ function changePenColor(ev) {
     isShown = true;
 }
 
+// TODO needs rethinking || maybe create canvas as the first element with fill ??
 function changeBackgroundColor(ev) {
     disableEffect();
 
@@ -440,6 +447,38 @@ function changeBackgroundColor(ev) {
     isShown = true;
 }
 
+// done
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth - 250;
+    canvas.height = window.innerHeight - 250;
+
+    for (c in canvases) {
+        c.width = canvas.width;
+        c.height = canvas.height;
+    }
+})
+
+// done
+function showLayer(layer) {
+    let c = layer.canvas;
+    c.style.display = 'inline';
+    layer.shown = true;
+
+    layer.style.backgroundColor = 'teal';
+    layer.style.color = 'white';
+}
+
+// done
+function hideLayer(layer) {
+    let c = layer.canvas;
+    c.style.display = 'none';
+    layer.shown = false;
+
+    layer.style.backgroundColor = 'gray';
+    layer.style.color = 'black';
+}
+
+// done
 function generateCanvas() {
     let mCanvas = document.createElement('canvas');
     let div = document.querySelector('.photo-editor');
@@ -454,14 +493,17 @@ function generateCanvas() {
     layer.layerNo = layerNo;
     layer.id = 'layer' + layerNo;
     layer.innerText = 'Layer ' + layerNo++;
+    layer.canvas = mCanvas;
     layer.element = null;
+    showLayer(layer);
 
     layer.onclick = function (ev) {
-        let c = canvases[this.layerNo - 1];
-        if (c.style.display == 'none')
-            c.style.display = 'inline';
+        let el = ev.target;
+
+        if (el.shown)
+            hideLayer(el);
         else
-            c.style.display = 'none';
+            showLayer(el);
     }
 
     document.querySelector('.layer-list').append(layer);
