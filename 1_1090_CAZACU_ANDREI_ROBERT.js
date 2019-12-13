@@ -16,7 +16,7 @@ var ctx;
 
 var elements = [];
 
-var canvases = [];
+var layers = [];
 
 var layerNo = 1;
 
@@ -72,7 +72,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
             control.style.backgroundColor = pixelColor;
 
             if (control.innerText === 'Background color') {
-                canvas.style.backgroundColor = pixelColor;
+                let l;
+                for (let i = 0; i < layers.length; i++) {
+                    if (layers[i].id == 'background')
+                        l = layers[i];
+                }
+
+                let ct = l.canvas.getContext('2d');
+                ct.fillStyle = pixelColor;
+                ct.fillRect(0, 0, l.canvas.width, l.canvas.height);
+
             } else {
                 ctx.strokeStyle = pixelColor;
             }
@@ -91,10 +100,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
             if (tempColor != '')
                 pixelColor = tempColor;
             else
-                pixelColor = 'white';
+                pixelColor = 'darkgray';
 
             if (control.innerText == 'Background color') {
-                canvas.style.backgroundColor = tempColor;
+                let l;
+                for (let i = 0; i < layers.length; i++) {
+                    if (layers[i].id == 'background')
+                        l = layers[i];
+                }
+
+                let ct = l.canvas.getContext('2d');
+                ct.fillStyle = pixelColor;
+                ct.fillRect(0, 0, l.canvas.width, l.canvas.height);
             } else {
                 if (tempColor)
                     ctx.strokeStyle = tempColor;
@@ -109,7 +126,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         colorPickerDiv.style.display = 'none';
     })
 
-    // operating the canvas
+    // TODO check this out
     canvas = document.querySelector('canvas');
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
@@ -437,9 +454,30 @@ function changePenColor(ev) {
     isShown = true;
 }
 
-// TODO needs rethinking || maybe create canvas as the first element with fill ??
+// done
+function generateBackgroundCanvas() {
+    let l = generateCanvas();
+    l.innerText = 'Background';
+    l.id = 'background';
+    l.style.zIndex = '-10';
+}
+
+// done but needs more testing
 function changeBackgroundColor(ev) {
     disableEffect();
+
+    let ok = 0;
+    for (let i = 0; i < layers.length; i++) {
+        let l = layers[i];
+        if (l.id == 'background') {
+            ok = 1;
+
+            if (!l.shown)
+                showLayer(l);
+        }
+    }
+    if (ok == 0)
+        generateBackgroundCanvas();
 
     control = ev.target;
     tempColor = control.style.backgroundColor;
@@ -452,7 +490,8 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
 
-    for (c in canvases) {
+    for (l in layers) {
+        let c = l.canvas;
         c.width = canvas.width;
         c.height = canvas.height;
     }
@@ -508,7 +547,7 @@ function generateCanvas() {
 
     document.querySelector('.layer-list').append(layer);
 
-    canvases.push(mCanvas);
+    layers.push(layer);
 
     return layer;
 }
