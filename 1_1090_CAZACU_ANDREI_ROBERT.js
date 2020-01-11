@@ -39,10 +39,19 @@ var pixelColor;
 
 var restorePath;
 
+var lineCanvas = false;
+var rectangleCanvas = false;
+
+var alerted = false;
+
+var snd;
+
 document.addEventListener('DOMContentLoaded', (event) => {
     // operating with the color pickers
     penBtn = document.querySelector('#penBtn');
     backgroundBtn = document.querySelector('#backgroundBtn');
+
+    snd = new Audio('./lib/click.wav');
 
     pickerCanvas = document.querySelector('#picker');
     ctxPicker = pickerCanvas.getContext('2d');
@@ -139,9 +148,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     canvas.addEventListener('mousedown', (ev) => {
-        console.log('mouse down');
-
         redraw();
+
+        alerted = false;
 
         let animationId;
 
@@ -154,8 +163,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         let absY = ev.y - rect.y;
 
         let mouseMoveFunc = (ev) => {
-            console.log('mouse move')
-
             let currX = ev.x - rect.x;
             let currY = ev.y - rect.y;
 
@@ -175,7 +182,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 }
             }
 
-            if (currentEl.innerText != 'Draw rectangle') {
+            if (currentEl && currentEl.innerText != 'Draw rectangle') {
                 startX = currX;
                 startY = currY;
             }
@@ -184,7 +191,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.addEventListener('mousemove', mouseMoveFunc);
 
         document.addEventListener('mouseup', (ev) => {
-            console.log('mouse up');
+            if (currentEl && currentEl.innerText === 'Draw rectangle') {
+                rectangleCanvas.restore = rectangleCanvas.canvas.toDataURL();
+            }
 
             document.removeEventListener('mousemove', mouseMoveFunc);
             if (animationId)
@@ -201,12 +210,19 @@ function clearCanvas(ev) {
 
     for (let i = 0; i < layers.length; i++) {
         layers[i].canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-        photoEditor.removeChild(photoEditor.lastChild);
+        if (photoEditor.childElementCount != 2) {
+            photoEditor.removeChild(photoEditor.lastChild);
+        } else {
+            photoEditor.removeChild(photoEditor.firstChild);
+        }
         layerList.removeChild(layerList.lastChild);
     }
 
     layerNo = 1;
     layers = [];
+
+    lineCanvas = false;
+    rectangleCanvas = false;
 
 
     penBtn.style.backgroundColor = 'gray';
@@ -219,6 +235,8 @@ function clearCanvas(ev) {
 
     currentEl = null;
     currentEff = null;
+
+    disableEffect();
 }
 
 // TODO needs drawing added
@@ -227,7 +245,7 @@ function savePhoto(ev) {
     let a = document.createElement('a');
     a.setAttribute('download', 'img.png');
 
-    if (elements.length > 0) {
+    if (layers.length > 0) {
         for (let i = 0; i < layers.length; i++) {
             if (layers[i].id === 'background') {
                 if (layers[i].shown) {
@@ -238,8 +256,15 @@ function savePhoto(ev) {
                 }
             } else {
                 if (layers[i].shown) {
-                    let e = layers[i].element;
-                    ctx.drawImage(e.img, e.x, e.y, e.width, e.height);
+                    if (layers[i].element) {
+                        let e = layers[i].element;
+                        ctx.drawImage(e.img, e.x, e.y, e.width, e.height);
+                    } else {
+                        let im = new Image();
+                        im.src = layers[i].restore;
+
+                        ctx.drawImage(im, 0, 0, canvas.width, canvas.height);
+                    }
                 }
             }
         }
@@ -338,35 +363,53 @@ function move(x, y) {
     }
 }
 
-// TODO choose a canvas
+// done
 function drawLine(startX, startY, currX, currY) {
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(currX, currY);
-    ctx.stroke();
+    if (!lineCanvas) {
+        lineCanvas = generateLineCanvas();
+    }
 
-    restorePath = canvas.toDataURL();
+    if (lineCanvas.shown) {
+        let cct = lineCanvas.canvas.getContext('2d');
+        cct.strokeStyle = ctx.strokeStyle;
+
+        cct.beginPath();
+        cct.moveTo(startX, startY);
+        cct.lineTo(currX, currY);
+        cct.stroke()
+
+        lineCanvas.restore = lineCanvas.canvas.toDataURL();
+    } else {
+        if (!alerted) {
+            alert('Can not draw until you unhide the canvas');
+            alerted = true;
+        }
+    }
 }
 
 
-// TODO choose a canvas
+// done
 function drawRectangle(startX, startY, width, height, animationId, it) {
-    if (it != 0) {
-        let restore = new Image();
-        restore.src = restorePath;
+    if (!rectangleCanvas) {
+        rectangleCanvas = generateRectCanvas();
+    }
+    if (rectangleCanvas.shown) {
+        let cct = rectangleCanvas.canvas.getContext('2d');
+        cct.strokeStyle = ctx.strokeStyle;
 
-        restore.addEventListener('load', (ev) => {
-            cancelAnimationFrame(animationId);
+        cct.clearRect(0, 0, rectangleCanvas.canvas.width, rectangleCanvas.canvas.height);
+        if (rectangleCanvas.restore) {
+            let r = new Image();
+            r.src = rectangleCanvas.restore;
+            cct.drawImage(r, 0, 0);
+        }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeRect(startX, startY, width, height);
-            restorePath = canvas.toDataURL();
-        })
+        cct.strokeRect(startX, startY, width, height);
     } else {
-        cancelAnimationFrame(animationId);
-
-        ctx.strokeRect(startX, startY, width, height);
-        restorePath = canvas.toDataURL();
+        if (!alerted) {
+            alert('Can not draw until you unhide the canvas');
+            alerted = true;
+        }
     }
 }
 
@@ -501,6 +544,24 @@ function generateBackgroundCanvas() {
     layers.unshift(layers.pop());
 }
 
+function generateLineCanvas() {
+    let l = generateCanvas();
+    l.innerText = 'Line canvas';
+    l.id = 'lineCanvas';
+
+    return l;
+}
+
+function generateRectCanvas() {
+    let l = generateCanvas();
+    l.innerText = 'Rectangle canvas';
+    l.id = 'rectCanvas';
+
+    l.prevRect = null;
+
+    return l;
+}
+
 // i think it works
 function changeBackgroundColor(ev) {
     disableEffect();
@@ -524,7 +585,7 @@ function changeBackgroundColor(ev) {
     isShown = true;
 }
 
-// TODO redraw images
+// done
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
@@ -533,6 +594,14 @@ window.addEventListener('resize', () => {
         let c = layers[i].canvas;
         c.width = canvas.width;
         c.height = canvas.height;
+        if (layers[i].id !== 'background') {
+            let elm = layers[i].element;
+            c.getContext('2d').drawImage(elm.img, elm.x, elm.y, elm.width, elm.height);
+        } else {
+            let cct = c.getContext('2d');
+            cct.fillStyle = pixelColor;
+            cct.fillRect(0, 0, c.width, c.height);
+        }
     }
 })
 
