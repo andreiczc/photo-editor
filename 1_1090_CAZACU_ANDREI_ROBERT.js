@@ -204,6 +204,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 // it works great
 function clearCanvas(ev) {
+    snd.play();
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let photoEditor = document.querySelector('.photo-editor');
     let layerList = document.querySelector('.layer-list');
@@ -241,6 +243,8 @@ function clearCanvas(ev) {
 
 // TODO needs drawing added
 function savePhoto(ev) {
+    snd.play();
+
     let temp;
     let a = document.createElement('a');
     a.setAttribute('download', 'img.png');
@@ -285,7 +289,7 @@ function redraw() {
     let shownCanvas;
 
     for (let i = 0; i < layers.length; i++) {
-        if (layers[i].element !== undefined && layers[i].shown === true) {
+        if (layers[i].element && layers[i].shown === true) {
             el = layers[i].element;
             shownCanvas = layers[i].canvas;
         }
@@ -335,7 +339,7 @@ function resize(x, y) {
 // works
 function move(x, y) {
     for (let i = 0; i < layers.length; i++) {
-        if (layers[i].element !== undefined && layers[i].shown === true) {
+        if (layers[i].element && layers[i].shown === true) {
             el = layers[i].element;
         }
     }
@@ -415,6 +419,8 @@ function drawRectangle(startX, startY, width, height, animationId, it) {
 
 // it works
 function changeEff(ev) {
+    snd.play();
+
     if (currentEl != ev.target) {
         if (currentEl) {
             disableEffect();
@@ -526,6 +532,8 @@ function drop(event) {
 function changePenColor(ev) {
     disableEffect();
 
+    snd.play();
+
     control = ev.target;
     tempColor = control.style.backgroundColor;
     colorPickerDiv.style.display = 'block';
@@ -565,6 +573,7 @@ function generateRectCanvas() {
 // i think it works
 function changeBackgroundColor(ev) {
     disableEffect();
+    snd.play();
 
     let ok = 0;
     for (let i = 0; i < layers.length; i++) {
