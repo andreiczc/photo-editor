@@ -23,6 +23,8 @@ var layerNo = 1;
 var currentEff = null;
 var currentEl = null;
 
+let el;
+
 var penColor = 'gray';
 var backgroundColor = 'gray';
 
@@ -167,12 +169,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
             let y = currY - startY;
 
             if (currentEff && typeof (currentEff) === 'function') {
-                if (currentEff.length == 6)
+                if (currentEff.length == 6) {
                     currentEff(absX, absY, width, height, animationId, it++);
-                else if (currentEff.length == 4)
+                } else if (currentEff.length == 4) {
                     currentEff(startX, startY, currX, currY);
-                else
-                    currentEff(el, x, y);
+                } else {
+                    currentEff(x, y);
+                }
             }
 
             if (currentEl.innerText != 'Draw rectangle') {
@@ -251,10 +254,19 @@ function savePhoto(ev) {
     clearCanvas();
 }
 
-// TODO check it out | rn it works for the latest canvas only
+// it works for the latest selected canvas
 function redraw() {
+    let shownCanvas;
+
+    for (let i = 0; i < layers.length; i++) {
+        if (layers[i].element !== undefined && layers[i].shown === true) {
+            el = layers[i].element;
+            shownCanvas = layers[i].canvas;
+        }
+    }
+
     if (el) {
-        let ct = canvases[canvases.length - 1].getContext('2d');
+        let ct = shownCanvas.getContext('2d');
 
         ct.clearRect(0, 0, canvas.width, canvas.height);
         ct.drawImage(el.img, el.x, el.y, el.width, el.height);
@@ -264,47 +276,63 @@ function redraw() {
 }
 
 // it works 
-function resize(el, x, y) {
-    if (el.x + el.width + x < canvas.width && el.x + el.width + x > 50 && el.width + x > 50) {
-        el.width += x;
-    } else {
-        if (el.x + el.width + x >= canvas.width) {
-            el.width = canvas.width - el.x;
-        } else {
-            el.width = 50;
+function resize(x, y) {
+    for (let i = 0; i < layers.length; i++) {
+        if (layers[i].element !== undefined && layers[i].shown === true) {
+            el = layers[i].element;
         }
     }
 
-    if (el.y + el.height + y < canvas.height && el.y + el.height + y > 50 && el.height + y > 50) {
-        el.height += y;
-    } else {
-        if (el.y + el.height + y >= canvas.height) {
-            el.height = canvas.height - el.y;
+    if (el) {
+        if (el.x + el.width + x < canvas.width && el.x + el.width + x > 50 && el.width + x > 50) {
+            el.width += x;
         } else {
-            el.height = 50;
+            if (el.x + el.width + x >= canvas.width) {
+                el.width = canvas.width - el.x;
+            } else {
+                el.width = 50;
+            }
+        }
+
+        if (el.y + el.height + y < canvas.height && el.y + el.height + y > 50 && el.height + y > 50) {
+            el.height += y;
+        } else {
+            if (el.y + el.height + y >= canvas.height) {
+                el.height = canvas.height - el.y;
+            } else {
+                el.height = 50;
+            }
         }
     }
 }
 
 // works
-function move(el, x, y) {
-    if (el.x + el.width + x < canvas.width && el.x + el.width + x > 0 & el.x + x >= 0) {
-        el.x += x;
-    } else {
-        if (el.x + el.width + x >= canvas.width) {
-            el.x = canvas.width - el.width;
-        } else {
-            el.x = 0;
+function move(x, y) {
+    for (let i = 0; i < layers.length; i++) {
+        if (layers[i].element !== undefined && layers[i].shown === true) {
+            el = layers[i].element;
         }
     }
 
-    if (el.y + el.height + y < canvas.height && el.y + el.height + y > 0 && el.y + y >= 0) {
-        el.y += y;
-    } else {
-        if (el.y + el.height + y >= canvas.height) {
-            el.y = canvas.height - el.height;
+    if (el) {
+        if (el.x + el.width + x < canvas.width && el.x + el.width + x > 0 & el.x + x >= 0) {
+            el.x += x;
         } else {
-            el.y = 0;
+            if (el.x + el.width + x >= canvas.width) {
+                el.x = canvas.width - el.width;
+            } else {
+                el.x = 0;
+            }
+        }
+
+        if (el.y + el.height + y < canvas.height && el.y + el.height + y > 0 && el.y + y >= 0) {
+            el.y += y;
+        } else {
+            if (el.y + el.height + y >= canvas.height) {
+                el.y = canvas.height - el.height;
+            } else {
+                el.y = 0;
+            }
         }
     }
 }
@@ -397,11 +425,13 @@ function enableEffect() {
     }
 }
 
+// no changes needed
 function allowDrop(event) {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
 }
 
+// it works now i think
 function drop(event) {
     event.preventDefault();
 
@@ -459,10 +489,14 @@ function generateBackgroundCanvas() {
     let l = generateCanvas();
     l.innerText = 'Background';
     l.id = 'background';
-    l.style.zIndex = '-10';
+
+    let photoEditor = document.querySelector('.photo-editor');
+    photoEditor.prepend(l.canvas);
+
+    layers.unshift(layers.pop());
 }
 
-// done but needs more testing
+// i think it works
 function changeBackgroundColor(ev) {
     disableEffect();
 
@@ -537,12 +571,12 @@ function generateCanvas() {
     showLayer(layer);
 
     layer.onclick = function (ev) {
-        let el = ev.target;
+        let elm = ev.target;
 
-        if (el.shown)
-            hideLayer(el);
+        if (elm.shown)
+            hideLayer(elm);
         else
-            showLayer(el);
+            showLayer(elm);
     }
 
     document.querySelector('.layer-list').append(layer);
