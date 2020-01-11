@@ -8,8 +8,8 @@ class Element {
     }
 }
 
-// TODO fix colorpicker
 // TODO fix generateCanvas and generate layers
+// TODO resize all canvases accordingly
 
 var canvas;
 var ctx;
@@ -433,7 +433,7 @@ function drop(event) {
                 }
 
                 let layer = generateCanvas();
-                let ct = canvases[canvases.length - 1].getContext('2d');
+                let ct = layer.canvas.getContext('2d');
                 ct.drawImage(img, 0, 0, img.width, img.height);
 
                 let el = new Element(img, img.width, img.height);
