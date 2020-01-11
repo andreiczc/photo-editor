@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         colorPickerDiv.style.display = 'none';
     })
 
-    // TODO check this out
     canvas = document.querySelector('canvas');
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
@@ -202,7 +201,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 })
 
-// it works great
 function clearCanvas(ev) {
     snd.play();
 
@@ -241,7 +239,6 @@ function clearCanvas(ev) {
     disableEffect();
 }
 
-// TODO needs drawing added
 function savePhoto(ev) {
     snd.play();
 
@@ -284,7 +281,6 @@ function savePhoto(ev) {
     clearCanvas();
 }
 
-// it works for the latest selected canvas
 function redraw() {
     let shownCanvas;
 
@@ -305,7 +301,6 @@ function redraw() {
     animationId = requestAnimationFrame(redraw);
 }
 
-// it works 
 function resize(x, y) {
     for (let i = 0; i < layers.length; i++) {
         if (layers[i].element !== undefined && layers[i].shown === true) {
@@ -336,7 +331,6 @@ function resize(x, y) {
     }
 }
 
-// works
 function move(x, y) {
     for (let i = 0; i < layers.length; i++) {
         if (layers[i].element && layers[i].shown === true) {
@@ -367,7 +361,6 @@ function move(x, y) {
     }
 }
 
-// done
 function drawLine(startX, startY, currX, currY) {
     if (!lineCanvas) {
         lineCanvas = generateLineCanvas();
@@ -392,7 +385,6 @@ function drawLine(startX, startY, currX, currY) {
 }
 
 
-// done
 function drawRectangle(startX, startY, width, height, animationId, it) {
     if (!rectangleCanvas) {
         rectangleCanvas = generateRectCanvas();
@@ -417,7 +409,6 @@ function drawRectangle(startX, startY, width, height, animationId, it) {
     }
 }
 
-// it works
 function changeEff(ev) {
     snd.play();
 
@@ -454,7 +445,6 @@ function changeEff(ev) {
     }
 }
 
-// done
 function disableEffect() {
     try {
         currentEl.style.backgroundColor = 'gray';
@@ -467,7 +457,6 @@ function disableEffect() {
     }
 }
 
-// done
 function enableEffect() {
     try {
         currentEl.style.backgroundColor = 'teal';
@@ -477,13 +466,11 @@ function enableEffect() {
     }
 }
 
-// no changes needed
 function allowDrop(event) {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
 }
 
-// it works now i think
 function drop(event) {
     event.preventDefault();
 
@@ -528,7 +515,6 @@ function drop(event) {
     }
 }
 
-// fully works
 function changePenColor(ev) {
     disableEffect();
 
@@ -540,7 +526,6 @@ function changePenColor(ev) {
     isShown = true;
 }
 
-// done
 function generateBackgroundCanvas() {
     let l = generateCanvas();
     l.innerText = 'Background';
@@ -570,7 +555,6 @@ function generateRectCanvas() {
     return l;
 }
 
-// i think it works
 function changeBackgroundColor(ev) {
     disableEffect();
     snd.play();
@@ -594,7 +578,6 @@ function changeBackgroundColor(ev) {
     isShown = true;
 }
 
-// done
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
@@ -614,7 +597,6 @@ window.addEventListener('resize', () => {
     }
 })
 
-// done
 function showLayer(layer) {
     let c = layer.canvas;
     c.style.display = 'inline';
@@ -624,7 +606,6 @@ function showLayer(layer) {
     layer.style.color = 'white';
 }
 
-// done
 function hideLayer(layer) {
     let c = layer.canvas;
     c.style.display = 'none';
@@ -634,7 +615,6 @@ function hideLayer(layer) {
     layer.style.color = 'black';
 }
 
-// done
 function generateCanvas() {
     let mCanvas = document.createElement('canvas');
     let div = document.querySelector('.photo-editor');
