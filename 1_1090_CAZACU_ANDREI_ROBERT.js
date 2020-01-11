@@ -8,9 +8,6 @@ class Element {
     }
 }
 
-// TODO fix generateCanvas and generate layers
-// TODO resize all canvases accordingly
-
 var canvas;
 var ctx;
 
@@ -196,59 +193,63 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 })
 
-// TODO clearCanvas only works for top most canvas
+// it works great
 function clearCanvas(ev) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let photoEditor = document.querySelector('.photo-editor');
+    let layerList = document.querySelector('.layer-list');
+
+    for (let i = 0; i < layers.length; i++) {
+        layers[i].canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        photoEditor.removeChild(photoEditor.lastChild);
+        layerList.removeChild(layerList.lastChild);
+    }
+
+    layerNo = 1;
+    layers = [];
+
 
     penBtn.style.backgroundColor = 'gray';
     ctx.strokeStyle = '#000';
 
-    currentEl.style.backgroundColor = 'gray';
-    currentEl.style.color = 'black';
+    if (currentEl) {
+        currentEl.style.backgroundColor = 'gray';
+        currentEl.style.color = 'black';
+    }
 
     currentEl = null;
     currentEff = null;
 }
 
-// TODO needs rewriting
+// TODO needs drawing added
 function savePhoto(ev) {
     let temp;
     let a = document.createElement('a');
     a.setAttribute('download', 'img.png');
 
-
-    if (el) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = pixelColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(el.img, el.x, el.y, el.width, el.height);
+    if (elements.length > 0) {
+        for (let i = 0; i < layers.length; i++) {
+            if (layers[i].id === 'background') {
+                if (layers[i].shown) {
+                    if (pixelColor) {
+                        ctx.fillStyle = pixelColor;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                }
+            } else {
+                if (layers[i].shown) {
+                    let e = layers[i].element;
+                    ctx.drawImage(e.img, e.x, e.y, e.width, e.height);
+                }
+            }
+        }
 
         temp = canvas.toDataURL();
         a.setAttribute('href', temp);
         a.click();
         delete a;
-    } else {
-        let r = new Image();
-        r.src = restorePath;
 
-        r.addEventListener('load', (ev) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (pixelColor)
-                ctx.fillStyle = pixelColor;
-            else
-                ctx.fillStyle = '#FFF';
-
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.drawImage(r, 0, 0);
-
-            temp = canvas.toDataURL();
-
-            a.setAttribute('href', temp);
-            a.click();
-            delete a;
-        })
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     clearCanvas();
@@ -265,7 +266,7 @@ function redraw() {
         }
     }
 
-    if (el) {
+    if (el && shownCanvas) {
         let ct = shownCanvas.getContext('2d');
 
         ct.clearRect(0, 0, canvas.width, canvas.height);
@@ -404,6 +405,7 @@ function changeEff(ev) {
     }
 }
 
+// done
 function disableEffect() {
     try {
         currentEl.style.backgroundColor = 'gray';
@@ -416,6 +418,7 @@ function disableEffect() {
     }
 }
 
+// done
 function enableEffect() {
     try {
         currentEl.style.backgroundColor = 'teal';
@@ -469,6 +472,8 @@ function drop(event) {
                 let el = new Element(img, img.width, img.height);
                 elements.push(el);
                 layer.element = el;
+
+                disableEffect();
             }
         }
     }
@@ -519,13 +524,13 @@ function changeBackgroundColor(ev) {
     isShown = true;
 }
 
-// done
+// TODO redraw images
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth - 250;
     canvas.height = window.innerHeight - 250;
 
-    for (l in layers) {
-        let c = l.canvas;
+    for (let i = 0; i < layers.length; i++) {
+        let c = layers[i].canvas;
         c.width = canvas.width;
         c.height = canvas.height;
     }
